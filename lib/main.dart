@@ -17,6 +17,12 @@ import 'meal.dart';
 import 'canteen_end.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+//1.canteen end- order display and delete
+//2.time stamp
+//3.estimated time
+//4.proper canteen end and student end terminals
+
+//5. password difficulty -----DONE..
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -42,7 +48,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Smart Canteen',
+      title: 'Smart Canteenn',
       theme: ThemeData(
         primarySwatch: Colors.pink,
       ),

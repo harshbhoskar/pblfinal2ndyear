@@ -1,8 +1,8 @@
+import 'package:pbl_studentend_clubbed/canteen_end.dart';
 import 'package:pbl_studentend_clubbed/tabs_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'signup_screen.dart';
-import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   static const routeName = '/login';
@@ -12,6 +12,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  late bool changed;
   final GlobalKey<FormState> _formKey = GlobalKey();
 
   @override
@@ -41,8 +42,8 @@ class _LoginScreenState extends State<LoginScreen> {
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  Colors.pink,
-                  Colors.yellow,
+                  Colors.blue,
+                  Colors.white,
                 ],
               ),
             ),
@@ -117,8 +118,15 @@ class _LoginScreenState extends State<LoginScreen> {
                                       await _auth.signInWithEmailAndPassword(
                                           email: email, password: password);
                                   if (user != null) {
-                                    Navigator.of(context).pushReplacementNamed(
-                                        TabsScreen.routeName);
+                                    if (changed = false) {
+                                      Navigator.of(context)
+                                          .pushReplacementNamed(
+                                              TabsScreen.routeName);
+                                    } else {
+                                      Navigator.of(context)
+                                          .pushReplacementNamed(
+                                              CanteenEnd.routeName);
+                                    }
                                   }
                                 }
                               } catch (r) {

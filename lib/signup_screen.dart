@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'login_screen.dart';
 
-
 class SignupScreen extends StatefulWidget {
   static const routeName = '/signup';
   const SignupScreen({Key? key}) : super(key: key);
@@ -11,6 +10,7 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
+  late bool changed;
   final GlobalKey<FormState> _formKey = GlobalKey();
   String email = '';
   String password = '';
@@ -39,8 +39,8 @@ class _SignupScreenState extends State<SignupScreen> {
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(colors: [
-                Colors.pink,
-                Colors.red,
+                Colors.blue,
+                Colors.white,
               ]),
             ),
           ),
@@ -50,7 +50,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   borderRadius: BorderRadius.circular(10.0),
                 ),
                 child: Container(
-                  height: 300,
+                  height: 400,
                   width: 300,
                   padding: const EdgeInsets.all(16),
                   child: SingleChildScrollView(
@@ -72,19 +72,25 @@ class _SignupScreenState extends State<SignupScreen> {
                             onChanged: (value) {
                               email = value;
                             },
-                            decoration: const InputDecoration(
-                                labelText: 'MIS ID'),
+                            decoration:
+                                const InputDecoration(labelText: 'MIS ID'),
                           ),
                           TextFormField(
                             obscureText: true,
                             onChanged: (value) {
                               password = value;
                             },
-                            validator: (val) {
-                              if (val!.length < 6) {
-                                return "Password should have at least 6 character";
+                            validator: (value) {
+                              RegExp regex = RegExp(
+                                  r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$');
+                              if (value!.isEmpty) {
+                                return 'Please enter password';
                               } else {
-                                return null;
+                                if (!regex.hasMatch(value)) {
+                                  return 'Enter valid password';
+                                } else {
+                                  return null;
+                                }
                               }
                             },
                             decoration:
@@ -107,16 +113,52 @@ class _SignupScreenState extends State<SignupScreen> {
                             decoration: const InputDecoration(
                                 labelText: 'Confirm Password'),
                           ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Wrap(
+                                alignment: WrapAlignment.spaceEvenly,
+                                children: <Widget>[
+                                  const SizedBox(height: 30),
+                                  RaisedButton(
+                                    child: const Text('student'),
+                                    onPressed: () {
+                                      changed = false;
+                                    },
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(30),
+                                    ),
+                                    color: Colors.blue,
+                                    textColor: Colors.white,
+                                  ),
+                                  const SizedBox(height: 30),
+                                  RaisedButton(
+                                    child: const Text('admin'),
+                                    onPressed: () {
+                                      changed = true;
+                                    },
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(30),
+                                    ),
+                                    color: Colors.blue,
+                                    textColor: Colors.white,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                           const SizedBox(height: 30),
                           ElevatedButton(
-                            child: const Text('Submit'),
+                            child: const Text(
+                              'Submit',
+                            ),
                             onPressed: () async {
                               try {
                                 if (password != Confirm_password) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
                                           content: Text(
-                                              "Please renter the above password first")));
+                                              "Please re-enter the above password first")));
                                 } else if (_formKey.currentState!.validate()) {
                                   _formKey.currentState!.save();
                                   final user = await _auth

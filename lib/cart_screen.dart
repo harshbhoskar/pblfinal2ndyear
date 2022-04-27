@@ -8,9 +8,9 @@ import 'meal_item.dart';
 import 'meal_detail_screen.dart';
 
 class CartScreen extends StatelessWidget {
-  final List<Meal> cartMeals;
+  late List<MealItem> cartMeals;
 
-  CartScreen(this.cartMeals);
+  CartScreen();
 
   Future<void> uploadOrder(
       FirebaseFirestore ref, BuildContext context, String uid) async {
@@ -43,10 +43,13 @@ class CartScreen extends StatelessWidget {
       });
 
       await ref.collection('Users').doc(uid).collection('orders').add({
-        "id": latestOrderId,
-        'title': cartMeals[index].title,
-        'imageUrl': cartMeals[index].imageUrl,
-        'duration': cartMeals[index].duration
+       'ItemName': cartMeals[index].title,
+        'ImageUrl': cartMeals[index].imageUrl,
+        'OrderId': latestOrderId,
+        'PlacedBy': userName,
+        'PlacedAt': Timestamp.now(),
+        'PrepTime': cartMeals[index].duration,
+        'Price': 100
       });
 
       await ref
@@ -54,6 +57,7 @@ class CartScreen extends StatelessWidget {
           .doc('orderId')
           .update({'LatestOrderNumber': FieldValue.increment(1)});
     }
+    await batchDelete(uid);
   }
 
   Future<void> batchDelete(String uid) {
@@ -96,18 +100,45 @@ class CartScreen extends StatelessWidget {
           backgroundColor: Colors.green,
           child: const Icon(Icons.save),
         ),
-        body: ListView.builder(
-          itemBuilder: (ctx, index) {
-            return MealItem(
-                id: cartMeals[index].id,
-                title: cartMeals[index].title,
-                imageUrl: cartMeals[index].imageUrl,
-                affordability: cartMeals[index].affordability,
-                complexity: cartMeals[index].complexity,
-                duration: cartMeals[index].duration);
-          },
-          itemCount: cartMeals.length,
-        ),
+        body: StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('Users')
+                .doc(uid)
+                .collection('orders')
+                .snapshots(),
+            builder: (ctx, snapshot) {
+
+              if(cartMeals == null || cartMeals.isEmpty) {
+                return Center(
+                  child: Text('No items in cart'),
+                );
+              }
+              if (snapshot.connectionState == ConnectionState.waiting)
+                return Container(
+                  child: Center(child: CircularProgressIndicator()),
+                );
+
+               cartMeals =  snapshot.data!.docs.map((DocumentSnapshot document) {
+                Map<String, dynamic> data =
+                    document.data()! as Map<String, dynamic>;
+                return MealItem(id: data[''], title: data['ItemName'], imageUrl: data['ImageUrl'], affordability: Affordability.Affordable, complexity: Complexity.Simple, duration: 20,);
+              }).toList();
+
+              return Container(
+                child: ListView.builder(
+                  itemBuilder: (ctx, index) {
+                    return MealItem(
+                        id: cartMeals[index].id,
+                        title: cartMeals[index].title,
+                        imageUrl: cartMeals[index].imageUrl,
+                        affordability: cartMeals[index].affordability,
+                        complexity: cartMeals[index].complexity,
+                        duration: cartMeals[index].duration);
+                  },
+                  itemCount: cartMeals.length,
+                ),
+              );
+            }),
       );
     }
   }

@@ -34,7 +34,7 @@ class _TabsScreenState extends State<TabsScreen> {
           body: TabBarView(
             children: <Widget>[
               CategoriesScreen(),
-              CartScreen(widget.cartMeals),
+              CartScreen(),
             ],
           ),
         ));

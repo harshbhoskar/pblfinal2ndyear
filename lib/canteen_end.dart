@@ -5,8 +5,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class CanteenEnd extends StatelessWidget {
   static const routeName = 'CanteenEnd';
 
-  final Stream<QuerySnapshot> _orderStream =
-      FirebaseFirestore.instance.collection('Orders').snapshots();
+  final Stream<QuerySnapshot> _orderStream = FirebaseFirestore.instance
+      .collection('Orders')
+      .orderBy('PlacedAt', descending: false)
+      .snapshots();
   Future<void> batchDelete(String uid) {
     WriteBatch batch = FirebaseFirestore.instance.batch();
     final orders = FirebaseFirestore.instance
@@ -46,19 +48,21 @@ class CanteenEnd extends StatelessWidget {
             );
           }
 
+          var orders = snapshot.data!.docs;
           //return list when fetched
-          return ListView(
-            children: snapshot.data!.docs.map((DocumentSnapshot document) {
-              Map<String, dynamic> data =
-                  document.data()! as Map<String, dynamic>;
+          return ListView.builder(
+            itemBuilder: ((context, index) {
+              var data = orders[index].data() as Map<String, dynamic>;
               return _buildListTile(
+                  index,
                   data['ImageUrl'],
                   data['ItemName'],
                   data['OrderId'],
                   data['PlacedBy'],
                   data['PlacedAt'],
-                  document.id);
-            }).toList(),
+                  orders[index].id);
+            }),
+            itemCount: orders.length,
           );
         }),
         stream: _orderStream,
@@ -74,7 +78,7 @@ class CanteenEnd extends StatelessWidget {
   }
 }
 
-Widget _buildListTile(String imageUrl, String itemName, int orderId,
+Widget _buildListTile(int index, String imageUrl, String itemName, int orderId,
     String placedBy, Timestamp placedAt, String orderUid) {
   Future<void> _listItemDismissed(String orderUid) async {
     await FirebaseFirestore.instance
@@ -130,7 +134,7 @@ Widget _buildListTile(String imageUrl, String itemName, int orderId,
                 ),
                 const Spacer(),
                 Text(
-                  '#${orderId.toString()}',
+                  '#${index + 1}',
                   style: const TextStyle(
                       fontSize: 35, fontWeight: FontWeight.bold),
                 ),

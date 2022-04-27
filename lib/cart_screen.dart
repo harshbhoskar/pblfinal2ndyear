@@ -14,13 +14,45 @@ class CartScreen extends StatelessWidget {
 
   Future<void> uploadOrder(
       FirebaseFirestore ref, BuildContext context, String uid) async {
+    String userName;
+
+    try {
+      userName = await ref
+          .collection('Users')
+          .doc(uid)
+          .get()
+          .then((value) => value.data()!['Name']);
+    } catch (e) {
+      userName = 'Anonymous';
+    }
+
     for (int index = 0; index < cartMeals.length; index++) {
+      int latestOrderId = await ref
+          .collection('LatestOrderId')
+          .doc('orderId')
+          .get()
+          .then((value) => value.data()!['LatestOrderNumber']);
+      await ref.collection('Orders').add({
+        'ItemName': cartMeals[index].title,
+        'ImageUrl': cartMeals[index].imageUrl,
+        'OrderId': latestOrderId,
+        'PlacedBy': userName,
+        'PlacedAt': Timestamp.now(),
+        'PrepTime': cartMeals[index].duration,
+        'Price': 100 //change this to variable price of your choice
+      });
+
       await ref.collection('Users').doc(uid).collection('orders').add({
-        "id": cartMeals[index].id,
+        "id": latestOrderId,
         'title': cartMeals[index].title,
         'imageUrl': cartMeals[index].imageUrl,
         'duration': cartMeals[index].duration
       });
+
+      await ref
+          .collection('LatestOrderId')
+          .doc('orderId')
+          .update({'LatestOrderNumber': FieldValue.increment(1)});
     }
   }
 

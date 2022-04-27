@@ -29,7 +29,8 @@ class _SignupScreenState extends State<SignupScreen> {
               style: TextStyle(color: Colors.white),
             ),
             onPressed: () {
-              Navigator.of(context).pushReplacementNamed(LoginScreen.routeName);
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => LoginScreen(false)));
             },
           )
         ],
@@ -165,8 +166,10 @@ class _SignupScreenState extends State<SignupScreen> {
                                       .createUserWithEmailAndPassword(
                                           email: email, password: password);
                                   if (user != null) {
-                                    Navigator.pushNamed(
-                                        context, LoginScreen.routeName);
+                                    Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                LoginScreen(changed)));
                                   }
                                 }
                               } catch (e) {

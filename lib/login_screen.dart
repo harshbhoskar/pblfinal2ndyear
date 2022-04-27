@@ -6,7 +6,8 @@ import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   static const routeName = '/login';
-  const LoginScreen({Key? key}) : super(key: key);
+  final bool changed;
+  const LoginScreen(this.changed,{Key? key}) : super(key: key);
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
@@ -118,7 +119,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       await _auth.signInWithEmailAndPassword(
                                           email: email, password: password);
                                   if (user != null) {
-                                    if (changed = false) {
+                                    if (widget.changed == false) {
                                       Navigator.of(context)
                                           .pushReplacementNamed(
                                               TabsScreen.routeName);

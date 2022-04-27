@@ -1,12 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'cart_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_database/firebase_database.dart';
-import 'package:firebase_core/firebase_core.dart';
 
 class CanteenEnd extends StatelessWidget {
   static const routeName = 'CanteenEnd';
+
+  final Stream<QuerySnapshot> _orderStream =
+      FirebaseFirestore.instance.collection('Orders').snapshots();
   Future<void> batchDelete(String uid) {
     WriteBatch batch = FirebaseFirestore.instance.batch();
     final orders = FirebaseFirestore.instance
@@ -14,9 +14,9 @@ class CanteenEnd extends StatelessWidget {
         .doc(uid)
         .collection('orders');
     return orders.get().then((querySnapshot) {
-      querySnapshot.docs.forEach((document) {
+      for (var document in querySnapshot.docs) {
         batch.delete(document.reference);
-      });
+      }
 
       return batch.commit();
     });
@@ -32,7 +32,37 @@ class CanteenEnd extends StatelessWidget {
       appBar: AppBar(
         title: const Text('canteen end'),
       ),
-      body: const Center(child: Text('your orders-')),
+      body: StreamBuilder<QuerySnapshot>(
+        builder: ((context, snapshot) {
+          if (snapshot.hasError) {
+            return const Text('Something went wrong');
+          }
+
+          //In case orders loading
+
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Container(
+              child: const Center(child: CircularProgressIndicator()),
+            );
+          }
+
+          //return list when fetched
+          return ListView(
+            children: snapshot.data!.docs.map((DocumentSnapshot document) {
+              Map<String, dynamic> data =
+                  document.data()! as Map<String, dynamic>;
+              return _buildListTile(
+                  data['ImageUrl'],
+                  data['ItemName'],
+                  data['OrderId'],
+                  data['PlacedBy'],
+                  data['PlacedAt'],
+                  document.id);
+            }).toList(),
+          );
+        }),
+        stream: _orderStream,
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           batchDelete(uid);
@@ -42,4 +72,84 @@ class CanteenEnd extends StatelessWidget {
       ),
     );
   }
+}
+
+Widget _buildListTile(String imageUrl, String itemName, int orderId,
+    String placedBy, Timestamp placedAt, String orderUid) {
+  Future<void> _listItemDismissed(String orderUid) async {
+    await FirebaseFirestore.instance
+        .collection('Orders')
+        .doc(orderUid.toString())
+        .delete();
+  }
+
+  return Dismissible(
+    key: ValueKey(orderId),
+    direction: DismissDirection.endToStart,
+    background: Container(
+        color: Colors.red,
+        child: const Align(
+          alignment: Alignment.centerRight,
+          child: Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Icon(
+              Icons.delete,
+              size: 35,
+              color: Colors.white,
+            ),
+          ),
+        )),
+    onDismissed: (direction) async {
+      await _listItemDismissed(orderUid);
+    },
+    child: Container(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  backgroundImage: NetworkImage(imageUrl),
+                  radius: 30,
+                ),
+                const SizedBox(
+                  width: 15,
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      itemName,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 22),
+                    ),
+                    Text(placedAt.toDate().toLocal().toString()),
+                  ],
+                ),
+                const Spacer(),
+                Text(
+                  '#${orderId.toString()}',
+                  style: const TextStyle(
+                      fontSize: 35, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            Text(
+              'Placed by $placedBy',
+              style:
+                  TextStyle(color: Colors.black.withOpacity(0.6), fontSize: 15),
+            ),
+            const Divider(
+              color: Colors.red,
+            )
+          ],
+        ),
+      ),
+    ),
+  );
 }

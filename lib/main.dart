@@ -17,9 +17,9 @@ import 'meal.dart';
 import 'canteen_end.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-//1.canteen end- order display and delete
-//2.time stamp
-//3.estimated time
+//1.canteen end- order display and delete -done
+//2.time stamp -done
+//3.estimated time 
 //4.proper canteen end and student end terminals
 
 //5. password difficulty -----DONE..
@@ -61,7 +61,7 @@ class MyApp extends StatelessWidget {
         CanteenEnd.routeName: (ctx) => CanteenEnd(),
         TabsScreen.routeName: (context) => TabsScreen(_cartMeals),
         SignupScreen.routeName: (context) => SignupScreen(),
-        LoginScreen.routeName: (context) => LoginScreen(),
+        // LoginScreen.routeName: (context) => LoginScreen(),
         HomeScreen.routeName: (context) => HomeScreen(),
       },
     );

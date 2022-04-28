@@ -1,5 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pbl_studentend_clubbed/cart_screen.dart';
 import 'package:pbl_studentend_clubbed/filters_screen.dart';
+import 'package:pbl_studentend_clubbed/my_orders_screen.dart';
 import 'package:pbl_studentend_clubbed/tabs_screen.dart';
 import './login_screen.dart';
 import 'package:flutter/material.dart';
@@ -39,11 +41,12 @@ class MainDrawer extends StatelessWidget {
               Icons.settings,
             ),
             title: const Text(
-              'filters',
+              'My Orders',
             ),
             onTap: () {
-              Navigator.of(context)
-                  .pushReplacementNamed(FiltersScreen.routeName);
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) =>
+                      MyOrdersScreen(FirebaseAuth.instance.currentUser!.uid)));
             },
           ),
           ListTile(
@@ -54,7 +57,7 @@ class MainDrawer extends StatelessWidget {
               'logout',
             ),
             onTap: () {
-              Navigator.pushReplacementNamed(context, LoginScreen.routeName);
+             Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context)=>LoginScreen()));
             },
           ),
         ],

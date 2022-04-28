@@ -31,7 +31,7 @@ class _SignupScreenState extends State<SignupScreen> {
             ),
             onPressed: () {
               Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => LoginScreen(false)));
+                  builder: (context) => LoginScreen()));
             },
           )
         ],
@@ -178,7 +178,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                     Navigator.of(context).push(
                                         MaterialPageRoute(
                                             builder: (context) =>
-                                                LoginScreen(changed)));
+                                                LoginScreen()));
                                   }
                                 }
                               } catch (e) {

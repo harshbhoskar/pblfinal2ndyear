@@ -7,11 +7,16 @@ import 'meal.dart';
 import 'meal_item.dart';
 import 'meal_detail_screen.dart';
 
-class CartScreen extends StatelessWidget {
-  late List<MealItem> cartMeals;
+class CartScreen extends StatefulWidget {
+  List<Meal> cartMeals;
+  Function orderPlaced;
+  CartScreen(this.cartMeals, this.orderPlaced);
 
-  CartScreen();
+  @override
+  State<CartScreen> createState() => _CartScreenState();
+}
 
+class _CartScreenState extends State<CartScreen> {
   Future<void> uploadOrder(
       FirebaseFirestore ref, BuildContext context, String uid) async {
     String userName;
@@ -26,38 +31,44 @@ class CartScreen extends StatelessWidget {
       userName = 'Anonymous';
     }
 
-    for (int index = 0; index < cartMeals.length; index++) {
-      int latestOrderId = await ref
-          .collection('LatestOrderId')
-          .doc('orderId')
-          .get()
-          .then((value) => value.data()!['LatestOrderNumber']);
+    for (int index = 0; index < widget.cartMeals.length; index++) {
+      
       await ref.collection('Orders').add({
-        'ItemName': cartMeals[index].title,
-        'ImageUrl': cartMeals[index].imageUrl,
-        'OrderId': latestOrderId,
+        'ItemName': widget.cartMeals[index].title,
+        'ImageUrl': widget.cartMeals[index].imageUrl,
+        'OrderId': 1,
         'PlacedBy': userName,
         'PlacedAt': Timestamp.now(),
-        'PrepTime': cartMeals[index].duration,
+        'PrepTime': widget.cartMeals[index].duration,
         'Price': 100 //change this to variable price of your choice
       });
 
-      await ref.collection('Users').doc(uid).collection('orders').add({
-       'ItemName': cartMeals[index].title,
-        'ImageUrl': cartMeals[index].imageUrl,
-        'OrderId': latestOrderId,
+      await ref.collection('Users').doc(uid).collection('cart').add({
+        'ItemName': widget.cartMeals[index].title,
+        'ImageUrl': widget.cartMeals[index].imageUrl,
+        'OrderId': 1,
         'PlacedBy': userName,
         'PlacedAt': Timestamp.now(),
-        'PrepTime': cartMeals[index].duration,
+        'PrepTime': widget.cartMeals[index].duration,
         'Price': 100
       });
 
-      await ref
-          .collection('LatestOrderId')
-          .doc('orderId')
-          .update({'LatestOrderNumber': FieldValue.increment(1)});
+      await ref.collection('Users').doc(uid).collection('orders').add({
+        'ItemName': widget.cartMeals[index].title,
+        'ImageUrl': widget.cartMeals[index].imageUrl,
+        'OrderId': 1,
+        'PlacedBy': userName,
+        'PlacedAt': Timestamp.now(),
+        'PrepTime': widget.cartMeals[index].duration,
+        'Price': 100
+      });
+
+      
     }
+    widget.orderPlaced();
+    widget.cartMeals.clear(); //clear offline list
     await batchDelete(uid);
+    setState(() {});
   }
 
   Future<void> batchDelete(String uid) {
@@ -65,15 +76,17 @@ class CartScreen extends StatelessWidget {
     final orders = FirebaseFirestore.instance
         .collection('Users')
         .doc(uid)
-        .collection('orders');
+        .collection('cart');
     return orders.get().then((querySnapshot) {
-      querySnapshot.docs.forEach((document) {
+      for (var document in querySnapshot.docs) {
         batch.delete(document.reference);
-      });
+      }
 
       return batch.commit();
     });
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -81,14 +94,10 @@ class CartScreen extends StatelessWidget {
     final FirebaseAuth auth = FirebaseAuth.instance;
     final User user = auth.currentUser!;
     final uid = user.uid;
-    if (cartMeals.isEmpty) {
-      return Scaffold(
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            batchDelete(uid);
-          },
-          backgroundColor: Colors.red,
-          child: const Icon(Icons.delete),
+    if (widget.cartMeals.isEmpty) {
+      return const Scaffold(
+        body: Center(
+          child: Text('No Items in cart'),
         ),
       );
     } else {
@@ -96,6 +105,7 @@ class CartScreen extends StatelessWidget {
         floatingActionButton: FloatingActionButton(
           onPressed: () async {
             await uploadOrder(firestore, context, uid);
+            
           },
           backgroundColor: Colors.green,
           child: const Icon(Icons.save),
@@ -104,38 +114,38 @@ class CartScreen extends StatelessWidget {
             stream: FirebaseFirestore.instance
                 .collection('Users')
                 .doc(uid)
-                .collection('orders')
+                .collection('cart')
                 .snapshots(),
             builder: (ctx, snapshot) {
-
-              if(cartMeals == null || cartMeals.isEmpty) {
-                return Center(
+              if (widget.cartMeals.isEmpty) {
+                return const Center(
                   child: Text('No items in cart'),
                 );
               }
-              if (snapshot.connectionState == ConnectionState.waiting)
+              if (snapshot.connectionState == ConnectionState.waiting) {
                 return Container(
-                  child: Center(child: CircularProgressIndicator()),
+                  child: const Center(child: CircularProgressIndicator()),
                 );
+              }
 
-               cartMeals =  snapshot.data!.docs.map((DocumentSnapshot document) {
-                Map<String, dynamic> data =
-                    document.data()! as Map<String, dynamic>;
-                return MealItem(id: data[''], title: data['ItemName'], imageUrl: data['ImageUrl'], affordability: Affordability.Affordable, complexity: Complexity.Simple, duration: 20,);
-              }).toList();
+              // cartMeals =  snapshot.data!.docs.map((DocumentSnapshot document) {
+              //   Map<String, dynamic> data =
+              //       document.data()! as Map<String, dynamic>;
+              //   return MealItem(id: data[''], title: data['ItemName'], imageUrl: data['ImageUrl'], affordability: Affordability.Affordable, complexity: Complexity.Simple, duration: 20,);
+              // }).toList();
 
               return Container(
                 child: ListView.builder(
                   itemBuilder: (ctx, index) {
                     return MealItem(
-                        id: cartMeals[index].id,
-                        title: cartMeals[index].title,
-                        imageUrl: cartMeals[index].imageUrl,
-                        affordability: cartMeals[index].affordability,
-                        complexity: cartMeals[index].complexity,
-                        duration: cartMeals[index].duration);
+                        id: widget.cartMeals[index].id,
+                        title: widget.cartMeals[index].title,
+                        imageUrl: widget.cartMeals[index].imageUrl,
+                        affordability: widget.cartMeals[index].affordability,
+                        complexity: widget.cartMeals[index].complexity,
+                        duration: widget.cartMeals[index].duration);
                   },
-                  itemCount: cartMeals.length,
+                  itemCount: widget.cartMeals.length,
                 ),
               );
             }),

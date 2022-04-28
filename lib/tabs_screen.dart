@@ -7,9 +7,9 @@ import 'categories_screen.dart';
 import 'meal.dart';
 
 class TabsScreen extends StatefulWidget {
-  final List<Meal> cartMeals;
-
-  TabsScreen(this.cartMeals);
+  List<Meal> cartMeals;
+  Function orderPlaced;
+  TabsScreen(this.cartMeals,this.orderPlaced);
   static const routeName = '/tabsscreen';
   @override
   _TabsScreenState createState() => _TabsScreenState();
@@ -34,7 +34,7 @@ class _TabsScreenState extends State<TabsScreen> {
           body: TabBarView(
             children: <Widget>[
               CategoriesScreen(),
-              CartScreen(),
+              CartScreen(widget.cartMeals,widget.orderPlaced),
             ],
           ),
         ));

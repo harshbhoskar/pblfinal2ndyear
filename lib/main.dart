@@ -19,7 +19,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 //1.canteen end- order display and delete -done
 //2.time stamp -done
-//3.estimated time 
+//3.estimated time
 //4.proper canteen end and student end terminals
 
 //5. password difficulty -----DONE..
@@ -32,13 +32,17 @@ Future<void> main() async {
 class MyApp extends StatelessWidget {
   List<Meal> _cartMeals = [];
 
-  void _toggleCart(String mealId) {
+  Future<void> _toggleCart(String mealId) async {
     final existingIndex = _cartMeals.indexWhere((meal) => meal.id == mealId);
     if (existingIndex >= 0) {
       _cartMeals.removeAt(existingIndex);
     } else {
       _cartMeals.add(DUMMY_MEALS.firstWhere((meal) => meal.id == mealId));
     }
+  }
+
+  void _orderPlaced() {
+    _cartMeals.clear();
   }
 
   bool _isMealCart(String id) {
@@ -59,7 +63,7 @@ class MyApp extends StatelessWidget {
             MealDetailScreen(_toggleCart, _isMealCart),
         FiltersScreen.routeName: (ctx) => FiltersScreen(),
         CanteenEnd.routeName: (ctx) => CanteenEnd(),
-        TabsScreen.routeName: (context) => TabsScreen(_cartMeals),
+        TabsScreen.routeName: (context) => TabsScreen(_cartMeals, _orderPlaced),
         SignupScreen.routeName: (context) => SignupScreen(),
         // LoginScreen.routeName: (context) => LoginScreen(),
         HomeScreen.routeName: (context) => HomeScreen(),

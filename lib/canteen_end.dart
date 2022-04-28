@@ -9,12 +9,10 @@ class CanteenEnd extends StatelessWidget {
       .collection('Orders')
       .orderBy('PlacedAt', descending: false)
       .snapshots();
-  Future<void> batchDelete(String uid) {
+  Future<void> batchDelete() {
     WriteBatch batch = FirebaseFirestore.instance.batch();
-    final orders = FirebaseFirestore.instance
-        .collection('Users')
-        .doc(uid)
-        .collection('orders');
+    final orders = FirebaseFirestore.instance.collection('Orders');
+
     return orders.get().then((querySnapshot) {
       for (var document in querySnapshot.docs) {
         batch.delete(document.reference);
@@ -32,7 +30,7 @@ class CanteenEnd extends StatelessWidget {
     final uid = user.uid;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('canteen end'),
+        title: const Text('Canteen Admin'),
       ),
       body: StreamBuilder<QuerySnapshot>(
         builder: ((context, snapshot) {
@@ -49,6 +47,12 @@ class CanteenEnd extends StatelessWidget {
           }
 
           var orders = snapshot.data!.docs;
+
+          if(orders.isEmpty){
+            return const Center(
+              child: Text('No orders yet'),
+            );
+          }
           //return list when fetched
           return ListView.builder(
             itemBuilder: ((context, index) {
@@ -69,7 +73,7 @@ class CanteenEnd extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          batchDelete(uid);
+          batchDelete();
         },
         backgroundColor: Colors.green,
         child: const Icon(Icons.done),

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:pbl_studentend_clubbed/canteen_end.dart';
 import 'package:pbl_studentend_clubbed/tabs_screen.dart';
 import 'package:flutter/material.dart';
@@ -6,14 +7,14 @@ import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   static const routeName = '/login';
-  final bool changed;
-  const LoginScreen(this.changed,{Key? key}) : super(key: key);
+  
+  const LoginScreen({Key? key}) : super(key: key);
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  late bool changed;
+  
   final GlobalKey<FormState> _formKey = GlobalKey();
 
   @override
@@ -113,13 +114,18 @@ class _LoginScreenState extends State<LoginScreen> {
                           RaisedButton(
                             child: const Text('Login'),
                             onPressed: () async {
+
+                              
                               try {
                                 if (_formKey.currentState!.validate()) {
                                   final user =
                                       await _auth.signInWithEmailAndPassword(
                                           email: email, password: password);
                                   if (user != null) {
-                                    if (widget.changed == false) {
+
+                                    bool isAdmin = await FirebaseFirestore.instance.collection('Users').doc(user.user!.uid).get().then((value) => value.data()!['Role'])=='student'?false:true;
+                                    
+                                    if (isAdmin == false) {
                                       Navigator.of(context)
                                           .pushReplacementNamed(
                                               TabsScreen.routeName);

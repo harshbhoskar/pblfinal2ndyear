@@ -113,22 +113,32 @@ Widget _buildListTile(
     Timestamp placedAt,
     String orderUid,
     String personUid) {
-  Future<void> _listItemDismissed(String orderUid,String uid) async {
+  Future<void> _listItemDismissed(String orderUid, String uid) async {
     await FirebaseFirestore.instance
         .collection('Orders')
         .doc(orderUid.toString())
         .delete();
 
-    await FirebaseFirestore.instance.collection('Users').doc(uid).collection('orders').where('OrderId',isEqualTo: orderId).get().then((value) {
+    await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(uid)
+        .collection('orders')
+        .where('OrderId', isEqualTo: orderId)
+        .get()
+        .then((value) {
       for (var userOrder in value.docs) {
-        FirebaseFirestore.instance.collection('Users').doc(uid).collection('orders').doc(userOrder.id).delete();
+        FirebaseFirestore.instance
+            .collection('Users')
+            .doc(uid)
+            .collection('orders')
+            .doc(userOrder.id)
+            .delete();
       }
-    
     });
   }
 
   return Dismissible(
-    key: ValueKey(orderId),
+    key: UniqueKey(),
     direction: DismissDirection.endToStart,
     background: Container(
         color: Colors.red,
@@ -144,7 +154,7 @@ Widget _buildListTile(
           ),
         )),
     onDismissed: (direction) async {
-      await _listItemDismissed(orderUid,personUid);
+      await _listItemDismissed(orderUid, personUid);
     },
     child: SizedBox(
       width: MediaQuery.of(context).size.width,

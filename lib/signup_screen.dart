@@ -64,7 +64,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           TextFormField(
                             keyboardType: TextInputType.name,
                             validator: (val) {
-                              if(val == null || val.isEmpty) {
+                              if (val == null || val.isEmpty) {
                                 return 'Please enter your name';
                               }
                             },
@@ -169,7 +169,8 @@ class _SignupScreenState extends State<SignupScreen> {
                               'Submit',
                             ),
                             onPressed: () async {
-                              print('$email $username $password $confirm_password');
+                              print(
+                                  '$email $username $password $confirm_password');
                               try {
                                 if (password != confirm_password) {
                                   ScaffoldMessenger.of(context).showSnackBar(

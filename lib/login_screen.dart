@@ -17,11 +17,13 @@ class _LoginScreenState extends State<LoginScreen> {
   
   final GlobalKey<FormState> _formKey = GlobalKey();
 
+   String password = '';
+    String email = '';
+
   @override
   Widget build(BuildContext context) {
     final _auth = FirebaseAuth.instance;
-    String password = '';
-    String email = '';
+   
     return Scaffold(
       appBar: AppBar(
         title: const Text('Login'),
@@ -72,7 +74,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             validator: (val) {
                               if (val!.length < 5) {
                                 return "MIS ID is too short";
-                              } else if (!val.endsWith("@mis.pict.edu")) {
+                              } else if (!val.endsWith("@ms.pict.edu")) {
                                 return "MIS ID is not correct";
                               } else {
                                 return null;

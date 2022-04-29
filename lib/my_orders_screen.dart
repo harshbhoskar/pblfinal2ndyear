@@ -1,8 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:pbl_studentend_clubbed/meal.dart';
-import 'package:pbl_studentend_clubbed/meal_item.dart';
 
 class MyOrdersScreen extends StatefulWidget {
   String uid;
@@ -49,14 +46,14 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
               itemBuilder: (context, index) {
                 final listData =
                     snapshot.data!.docs[index].data()! as Map<String, dynamic>;
-                return MealItem(
-                  id: '1',
-                  title: listData['ItemName'],
-                  imageUrl: listData['ImageUrl'],
-                  affordability: Affordability.Affordable,
-                  complexity: Complexity.Simple,
-                  duration: 20,
-                );
+                return _buildOrderTile(
+                    context,
+                    listData['ImageUrl'],
+                    listData['ItemName'],
+                    listData['OrderId'],
+                    listData['PlacedBy'],
+                    listData['PlacedAt'],
+                    listData['PlacedById']);
               },
             );
           } else {
@@ -66,4 +63,57 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
       ),
     );
   }
+}
+
+Widget _buildOrderTile(BuildContext context, String imageUrl, String itemName,
+    String orderId, String placedBy, Timestamp placedAt, String placedById) {
+  return SizedBox(
+    child: Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                backgroundImage: NetworkImage(imageUrl),
+                radius: 30,
+              ),
+              const SizedBox(
+                width: 15,
+              ),
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      child: Container(
+                        child: Text(
+                          itemName,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 22),
+                        ),
+                      ),
+                    ),
+                    Text(placedAt.toDate().toLocal().toString()),
+                  ],
+                ),
+              ),
+              const SizedBox(
+                width: 20,
+              ),
+              const Text(
+                '22min',
+                style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          const Divider(
+            color: Colors.red,
+          )
+        ],
+      ),
+    ),
+  );
 }

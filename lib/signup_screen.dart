@@ -14,8 +14,9 @@ class _SignupScreenState extends State<SignupScreen> {
   late bool changed;
   final GlobalKey<FormState> _formKey = GlobalKey();
   String email = '';
+  String username = '';
   String password = '';
-  String Confirm_password = '';
+  String confirm_password = '';
 
   @override
   Widget build(BuildContext context) {
@@ -30,8 +31,8 @@ class _SignupScreenState extends State<SignupScreen> {
               style: TextStyle(color: Colors.white),
             ),
             onPressed: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => LoginScreen()));
+              Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (context) => LoginScreen()));
             },
           )
         ],
@@ -61,11 +62,24 @@ class _SignupScreenState extends State<SignupScreen> {
                       child: Column(
                         children: <Widget>[
                           TextFormField(
+                            keyboardType: TextInputType.name,
+                            validator: (val) {
+                              if(val == null || val.isEmpty) {
+                                return 'Please enter your name';
+                              }
+                            },
+                            onChanged: (value) {
+                              username = value;
+                            },
+                            decoration:
+                                const InputDecoration(labelText: 'Username'),
+                          ),
+                          TextFormField(
                             keyboardType: TextInputType.emailAddress,
                             validator: (val) {
                               if (val!.length < 5) {
                                 return "MIS ID is too short";
-                              } else if (!val.endsWith("@mis.pict.edu")) {
+                              } else if (!val.endsWith("@ms.pict.edu")) {
                                 return "MIS ID is not correct";
                               } else {
                                 return null;
@@ -101,7 +115,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           TextFormField(
                             obscureText: true,
                             onChanged: (value) {
-                              Confirm_password = value;
+                              confirm_password = value;
                             },
                             validator: (val) {
                               if (val!.length <= 6) {
@@ -155,9 +169,9 @@ class _SignupScreenState extends State<SignupScreen> {
                               'Submit',
                             ),
                             onPressed: () async {
+                              print('$email $username $password $confirm_password');
                               try {
-                                
-                                if (password != Confirm_password) {
+                                if (password != confirm_password) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
                                           content: Text(
@@ -168,12 +182,16 @@ class _SignupScreenState extends State<SignupScreen> {
                                       .createUserWithEmailAndPassword(
                                           email: email, password: password);
                                   if (user != null) {
-
-                                  await FirebaseFirestore.instance.collection('Users').doc(FirebaseAuth.instance.currentUser!.uid.toString()).set({
-                                    'Name': 'Vedant Kulkarni',//replace with own name from TextField
-                                    'Role': changed ? 'admin' : 'student',
-                                  });
-
+                                    await FirebaseFirestore.instance
+                                        .collection('Users')
+                                        .doc(FirebaseAuth
+                                            .instance.currentUser!.uid
+                                            .toString())
+                                        .set({
+                                      'Name':
+                                          username, //replace with own name from TextField
+                                      'Role': changed ? 'admin' : 'student',
+                                    });
 
                                     Navigator.of(context).push(
                                         MaterialPageRoute(

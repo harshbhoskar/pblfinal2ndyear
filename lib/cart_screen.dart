@@ -20,7 +20,7 @@ class _CartScreenState extends State<CartScreen> {
   Future<void> uploadOrder(
       FirebaseFirestore ref, BuildContext context, String uid) async {
     String userName;
-
+    
     try {
       userName = await ref
           .collection('Users')
@@ -33,11 +33,12 @@ class _CartScreenState extends State<CartScreen> {
 
     for (int index = 0; index < widget.cartMeals.length; index++) {
       
-      await ref.collection('Orders').add({
+     var res= await ref.collection('Orders').add({
         'ItemName': widget.cartMeals[index].title,
         'ImageUrl': widget.cartMeals[index].imageUrl,
         'OrderId': 1,
         'PlacedBy': userName,
+        'PlacedById': uid,
         'PlacedAt': Timestamp.now(),
         'PrepTime': widget.cartMeals[index].duration,
         'Price': 100 //change this to variable price of your choice
@@ -46,8 +47,9 @@ class _CartScreenState extends State<CartScreen> {
       await ref.collection('Users').doc(uid).collection('cart').add({
         'ItemName': widget.cartMeals[index].title,
         'ImageUrl': widget.cartMeals[index].imageUrl,
-        'OrderId': 1,
+        'OrderId': res.id,
         'PlacedBy': userName,
+        'PlacedById': uid,
         'PlacedAt': Timestamp.now(),
         'PrepTime': widget.cartMeals[index].duration,
         'Price': 100
@@ -56,8 +58,9 @@ class _CartScreenState extends State<CartScreen> {
       await ref.collection('Users').doc(uid).collection('orders').add({
         'ItemName': widget.cartMeals[index].title,
         'ImageUrl': widget.cartMeals[index].imageUrl,
-        'OrderId': 1,
+        'OrderId': res.id,
         'PlacedBy': userName,
+        'PlacedById': uid,
         'PlacedAt': Timestamp.now(),
         'PrepTime': widget.cartMeals[index].duration,
         'Price': 100
@@ -68,7 +71,12 @@ class _CartScreenState extends State<CartScreen> {
     widget.orderPlaced();
     widget.cartMeals.clear(); //clear offline list
     await batchDelete(uid);
-    setState(() {});
+    setState(() {
+      ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content: Text(
+                                              "Order Placed Successfully")));
+    });
   }
 
   Future<void> batchDelete(String uid) {

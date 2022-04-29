@@ -9,16 +9,34 @@ class CanteenEnd extends StatelessWidget {
       .collection('Orders')
       .orderBy('PlacedAt', descending: false)
       .snapshots();
-  Future<void> batchDelete() {
+  Future<void> batchDelete() async {
     WriteBatch batch = FirebaseFirestore.instance.batch();
     final orders = FirebaseFirestore.instance.collection('Orders');
 
     return orders.get().then((querySnapshot) {
       for (var document in querySnapshot.docs) {
+        var placedById = document.get('PlacedById');
+        deletePersonOrders(placedById);
         batch.delete(document.reference);
       }
 
       return batch.commit();
+    });
+  }
+
+  Future<void> deletePersonOrders(String uid) async {
+    WriteBatch newBatch = FirebaseFirestore.instance.batch();
+    final userOrders = FirebaseFirestore.instance
+        .collection('Users')
+        .doc(uid)
+        .collection('orders');
+
+    return userOrders.get().then((value) {
+      for (var userOrder in value.docs) {
+        newBatch.delete(userOrder.reference);
+      }
+
+      return newBatch.commit();
     });
   }
 
@@ -48,7 +66,7 @@ class CanteenEnd extends StatelessWidget {
 
           var orders = snapshot.data!.docs;
 
-          if(orders.isEmpty){
+          if (orders.isEmpty) {
             return const Center(
               child: Text('No orders yet'),
             );
@@ -58,13 +76,15 @@ class CanteenEnd extends StatelessWidget {
             itemBuilder: ((context, index) {
               var data = orders[index].data() as Map<String, dynamic>;
               return _buildListTile(
+                  context,
                   index,
                   data['ImageUrl'],
                   data['ItemName'],
                   data['OrderId'],
                   data['PlacedBy'],
                   data['PlacedAt'],
-                  orders[index].id);
+                  orders[index].id,
+                  data['PlacedById']);
             }),
             itemCount: orders.length,
           );
@@ -72,8 +92,9 @@ class CanteenEnd extends StatelessWidget {
         stream: _orderStream,
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          batchDelete();
+        onPressed: () async {
+          await batchDelete();
+          await deletePersonOrders(uid);
         },
         backgroundColor: Colors.green,
         child: const Icon(Icons.done),
@@ -82,13 +103,28 @@ class CanteenEnd extends StatelessWidget {
   }
 }
 
-Widget _buildListTile(int index, String imageUrl, String itemName, int orderId,
-    String placedBy, Timestamp placedAt, String orderUid) {
-  Future<void> _listItemDismissed(String orderUid) async {
+Widget _buildListTile(
+    BuildContext context,
+    int index,
+    String imageUrl,
+    String itemName,
+    int orderId,
+    String placedBy,
+    Timestamp placedAt,
+    String orderUid,
+    String personUid) {
+  Future<void> _listItemDismissed(String orderUid,String uid) async {
     await FirebaseFirestore.instance
         .collection('Orders')
         .doc(orderUid.toString())
         .delete();
+
+    await FirebaseFirestore.instance.collection('Users').doc(uid).collection('orders').where('OrderId',isEqualTo: orderId).get().then((value) {
+      for (var userOrder in value.docs) {
+        FirebaseFirestore.instance.collection('Users').doc(uid).collection('orders').doc(userOrder.id).delete();
+      }
+    
+    });
   }
 
   return Dismissible(
@@ -108,9 +144,10 @@ Widget _buildListTile(int index, String imageUrl, String itemName, int orderId,
           ),
         )),
     onDismissed: (direction) async {
-      await _listItemDismissed(orderUid);
+      await _listItemDismissed(orderUid,personUid);
     },
-    child: Container(
+    child: SizedBox(
+      width: MediaQuery.of(context).size.width,
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
@@ -129,11 +166,15 @@ Widget _buildListTile(int index, String imageUrl, String itemName, int orderId,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      width: double.maxFinite,
-                      child: Text(
-                        itemName,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 22),
+                      child: FittedBox(
+                        fit: BoxFit.contain,
+                        child: Container(
+                          child: Text(
+                            itemName,
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 22),
+                          ),
+                        ),
                       ),
                     ),
                     Text(placedAt.toDate().toLocal().toString()),

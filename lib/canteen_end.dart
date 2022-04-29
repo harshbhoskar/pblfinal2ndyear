@@ -148,7 +148,7 @@ Widget _buildListTile(
   }
 
   return Dismissible(
-    key: ValueKey(orderId),
+    key: UniqueKey(),
     direction: DismissDirection.endToStart,
     background: Container(
         color: Colors.red,

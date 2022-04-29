@@ -25,11 +25,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 //5. password difficulty -----DONE..
 
 
-//remove floating action button canteen end
+//remove floating action button canteen end --done
 //add dummy payment gateway -jugad
-//add onGoing orders screen
-//canteen add responsiveness
-//add drawer to canteen end
+//add onGoing orders screen--done
+//canteen add responsiveness--done
+//add drawer to canteen end --done
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

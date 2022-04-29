@@ -55,7 +55,7 @@ class _CartScreenState extends State<CartScreen> {
         'Price': 100
       });
 
-      await ref.collection('Users').doc(uid).collection('orders').add({
+      await ref.collection('Users').doc(uid).collection('orders').doc(res.id).set({
         'ItemName': widget.cartMeals[index].title,
         'ImageUrl': widget.cartMeals[index].imageUrl,
         'OrderId': res.id,

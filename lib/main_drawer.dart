@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pbl_studentend_clubbed/cart_screen.dart';
 import 'package:pbl_studentend_clubbed/filters_screen.dart';
 import 'package:pbl_studentend_clubbed/my_orders_screen.dart';
+import 'package:pbl_studentend_clubbed/on_going_orders.dart';
 import 'package:pbl_studentend_clubbed/tabs_screen.dart';
 import './login_screen.dart';
 import 'package:flutter/material.dart';
@@ -26,7 +27,19 @@ class MainDrawer extends StatelessWidget {
           const SizedBox(
             height: 20,
           ),
-         
+          ListTile(
+            leading: const Icon(
+              Icons.home,
+            ),
+            title: const Text(
+              'Home',
+            ),
+            onTap: () {
+              Navigator.of(context)
+                                          .pushReplacementNamed(
+                                              TabsScreen.routeName);
+            },
+          ),
           ListTile(
             leading: const Icon(
               Icons.settings,
@@ -38,6 +51,19 @@ class MainDrawer extends StatelessWidget {
               Navigator.of(context).push(MaterialPageRoute(
                   builder: (context) =>
                       MyOrdersScreen(FirebaseAuth.instance.currentUser!.uid)));
+            },
+          ),
+          ListTile(
+            leading: const Icon(
+              Icons.settings,
+            ),
+            title: const Text(
+              'Ongoing Orders',
+            ),
+            onTap: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) =>
+                      OnGoingOrders()));
             },
           ),
           

@@ -91,14 +91,14 @@ class CanteenEnd extends StatelessWidget {
         }),
         stream: _orderStream,
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          await batchDelete();
-          await deletePersonOrders(uid);
-        },
-        backgroundColor: Colors.green,
-        child: const Icon(Icons.done),
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () async {
+      //     await batchDelete();
+      //     await deletePersonOrders(uid);
+      //   },
+      //   backgroundColor: Colors.green,
+      //   child: const Icon(Icons.done),
+      // ),
     );
   }
 }
@@ -119,9 +119,9 @@ Widget _buildListTile(
         .doc(orderUid.toString())
         .delete();
 
-    await FirebaseFirestore.instance.collection('Users').doc(uid).collection('orders').where('OrderId',isEqualTo: orderId).get().then((value) {
+    await FirebaseFirestore.instance.collection('Users').doc(uid).collection('orders').where('OrderId',isEqualTo: orderId).get().then((value) async{
       for (var userOrder in value.docs) {
-        FirebaseFirestore.instance.collection('Users').doc(uid).collection('orders').doc(userOrder.id).delete();
+        await FirebaseFirestore.instance.collection('Users').doc(uid).collection('orders').doc(userOrder.id).delete();
       }
     
     });

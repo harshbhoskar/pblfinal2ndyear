@@ -23,6 +23,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 //4.proper canteen end and student end terminals
 
 //5. password difficulty -----DONE..
+
+
+//remove floating action button canteen end
+//add dummy payment gateway -jugad
+//add onGoing orders screen
+//canteen add responsiveness
+//add drawer to canteen end
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();

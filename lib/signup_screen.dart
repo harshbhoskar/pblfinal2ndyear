@@ -170,7 +170,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                   if (user != null) {
 
                                   await FirebaseFirestore.instance.collection('Users').doc(FirebaseAuth.instance.currentUser!.uid.toString()).set({
-                                    'Name': 'Vedant Kulkarni',
+                                    'Name': 'Vedant Kulkarni',//replace with own name from TextField
                                     'Role': changed ? 'admin' : 'student',
                                   });
 

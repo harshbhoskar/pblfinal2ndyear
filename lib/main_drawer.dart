@@ -25,17 +25,7 @@ class MainDrawer extends StatelessWidget {
           const SizedBox(
             height: 20,
           ),
-          ListTile(
-            leading: const Icon(
-              Icons.restaurant,
-            ),
-            title: const Text(
-              'canteen end',
-            ),
-            onTap: () {
-              Navigator.of(context).pushNamed(CanteenEnd.routeName);
-            },
-          ),
+         
           ListTile(
             leading: const Icon(
               Icons.settings,

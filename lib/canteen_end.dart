@@ -128,10 +128,13 @@ Widget _buildListTile(int index, String imageUrl, String itemName, int orderId,
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      itemName,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 22),
+                    Container(
+                      width: double.maxFinite,
+                      child: Text(
+                        itemName,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 22),
+                      ),
                     ),
                     Text(placedAt.toDate().toLocal().toString()),
                   ],
